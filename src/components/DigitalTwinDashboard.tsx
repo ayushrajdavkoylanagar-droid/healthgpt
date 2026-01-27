@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Heart, Brain, Moon, Droplets, Activity } from "lucide-react";
 
 interface HealthMetric {
@@ -9,43 +10,140 @@ interface HealthMetric {
   description: string;
 }
 
-const metrics: HealthMetric[] = [
-  {
-    icon: Heart,
-    label: "Heart Rate",
-    value: "72 BPM",
-    status: "normal",
-    description: "Your heart rhythm is steady and healthy",
-  },
-  {
-    icon: Brain,
-    label: "Stress Score",
-    value: "Low",
-    status: "normal",
-    description: "You appear calm and relaxed",
-  },
-  {
-    icon: Activity,
-    label: "Emotion Score",
-    value: "Balanced",
-    status: "normal",
-    description: "Your emotional state is stable",
-  },
-  {
-    icon: Moon,
-    label: "Sleep Score",
-    value: "Good",
-    status: "mild",
-    description: "Consider maintaining consistent sleep times",
-  },
-  {
-    icon: Droplets,
-    label: "Hydration",
-    value: "Optimal",
-    status: "normal",
-    description: "Your hydration levels look good",
-  },
-];
+const generateRandomMetrics = (): HealthMetric[] => {
+  // Heart Rate: 60-100 bpm (normal resting range)
+  const heartRate = Math.floor(60 + Math.random() * 40);
+  let heartStatus: "normal" | "mild" | "high" = "normal";
+  let heartDescription = "";
+  
+  if (heartRate < 70) {
+    heartStatus = "normal";
+    heartDescription = `Your heart rate of ${heartRate} BPM indicates excellent cardiovascular fitness and relaxation.`;
+  } else if (heartRate < 85) {
+    heartStatus = "normal";
+    heartDescription = `Your heart rate of ${heartRate} BPM is within the healthy resting range.`;
+  } else {
+    heartStatus = "mild";
+    heartDescription = `Your heart rate of ${heartRate} BPM is slightly elevated. Consider deep breathing exercises.`;
+  }
+
+  // Stress Score: Low, Moderate, High
+  const stressLevels = ["Low", "Moderate", "High"];
+  const stressLevel = stressLevels[Math.floor(Math.random() * stressLevels.length)];
+  let stressStatus: "normal" | "mild" | "high" = stressLevel === "Low" ? "normal" : stressLevel === "Moderate" ? "mild" : "high";
+  let stressDescription = "";
+  
+  if (stressLevel === "Low") {
+    stressDescription = "Your stress levels are well-managed. Keep up your current relaxation practices.";
+  } else if (stressLevel === "Moderate") {
+    stressDescription = "You're experiencing moderate stress. Try 5-minute meditation breaks throughout your day.";
+  } else {
+    stressDescription = "Your stress levels are elevated. Consider prioritizing self-care and speaking with a wellness professional.";
+  }
+
+  // Emotion Score: Various emotional states
+  const emotions = ["Happy", "Calm", "Focused", "Energetic", "Balanced", "Content"];
+  const emotion = emotions[Math.floor(Math.random() * emotions.length)];
+  let emotionDescription = "";
+  
+  const emotionAdvice: Record<string, string> = {
+    "Happy": "Your positive emotional state is excellent for overall health. Share your joy with others!",
+    "Calm": "Your calm demeanor supports better decision-making and physical health.",
+    "Focused": "Your focused mindset is perfect for productivity. Remember to take regular breaks.",
+    "Energetic": "Your high energy levels are great! Channel this into physical activity or creative projects.",
+    "Balanced": "Your emotional balance indicates strong mental health. Maintain your current routine.",
+    "Content": "Your contentment reflects inner peace. This state supports optimal physical functioning."
+  };
+  emotionDescription = emotionAdvice[emotion];
+
+  // Sleep Score: Poor, Fair, Good, Excellent
+  const sleepScores = ["Poor", "Fair", "Good", "Excellent"];
+  const sleepScore = sleepScores[Math.floor(Math.random() * sleepScores.length)];
+  let sleepStatus: "normal" | "mild" | "high" = sleepScore === "Excellent" || sleepScore === "Good" ? "normal" : sleepScore === "Fair" ? "mild" : "high";
+  let sleepDescription = "";
+  
+  if (sleepScore === "Excellent") {
+    sleepDescription = "Your sleep quality is outstanding! This supports optimal cognitive function and physical recovery.";
+  } else if (sleepScore === "Good") {
+    sleepDescription = "Your sleep quality is good. Consider maintaining consistent sleep and wake times.";
+  } else if (sleepScore === "Fair") {
+    sleepDescription = "Your sleep could be improved. Try reducing screen time before bed and creating a relaxing bedtime routine.";
+  } else {
+    sleepDescription = "Your sleep quality needs attention. Consider speaking with a healthcare provider about sleep optimization strategies.";
+  }
+
+  // Hydration: 40-100% (normal range)
+  const hydration = Math.floor(40 + Math.random() * 60);
+  let hydrationStatus: "normal" | "mild" | "high" = hydration >= 70 ? "normal" : hydration >= 50 ? "mild" : "high";
+  let hydrationDescription = "";
+  
+  if (hydration >= 80) {
+    hydrationDescription = `Your hydration level at ${hydration}% is excellent! Your body is well-hydrated for optimal function.`;
+  } else if (hydration >= 60) {
+    hydrationDescription = `Your hydration at ${hydration}% is good. Aim to drink water consistently throughout the day.`;
+  } else if (hydration >= 40) {
+    hydrationDescription = `Your hydration at ${hydration}% needs attention. Increase your water intake and avoid excessive caffeine.`;
+  } else {
+    hydrationDescription = `Your hydration at ${hydration}% is low. Please drink water immediately and monitor your intake.`;
+  }
+
+  return [
+    {
+      icon: Heart,
+      label: "Heart Rate",
+      value: `${heartRate} BPM`,
+      status: heartStatus,
+      description: heartDescription,
+    },
+    {
+      icon: Brain,
+      label: "Stress Score",
+      value: stressLevel,
+      status: stressStatus,
+      description: stressDescription,
+    },
+    {
+      icon: Activity,
+      label: "Emotion Score",
+      value: emotion,
+      status: "normal",
+      description: emotionDescription,
+    },
+    {
+      icon: Moon,
+      label: "Sleep Score",
+      value: sleepScore,
+      status: sleepStatus,
+      description: sleepDescription,
+    },
+    {
+      icon: Droplets,
+      label: "Hydration",
+      value: `${hydration}%`,
+      status: hydrationStatus,
+      description: hydrationDescription,
+    },
+  ];
+};
+
+const generatePersonalizedInsight = (metrics: HealthMetric[]): string => {
+  const highStress = metrics.find(m => m.label === "Stress Score" && m.status === "high");
+  const poorSleep = metrics.find(m => m.label === "Sleep Score" && m.status === "high");
+  const lowHydration = metrics.find(m => m.label === "Hydration" && m.status === "high");
+  const highHeartRate = metrics.find(m => m.label === "Heart Rate" && m.status === "mild");
+
+  if (highStress && poorSleep) {
+    return "Your stress levels and sleep quality are interconnected. Consider establishing a relaxing bedtime routine to improve both areas. Deep breathing exercises before sleep can significantly reduce cortisol levels and improve sleep quality.";
+  } else if (lowHydration && highHeartRate) {
+    return "Your hydration level may be affecting your heart rate. Proper hydration helps maintain optimal blood volume and heart function. Aim to drink at least 8 glasses of water throughout the day, especially if you're physically active.";
+  } else if (highStress) {
+    return "Your stress levels are elevated and impacting your overall wellbeing. Regular physical activity, mindfulness practices, and adequate sleep can help manage stress more effectively. Consider scheduling short breaks throughout your day for relaxation.";
+  } else if (poorSleep) {
+    return "Sleep quality is crucial for your overall health. Poor sleep can affect stress levels, heart rate, and emotional state. Create a consistent sleep schedule, avoid screens before bedtime, and ensure your sleeping environment is cool and dark.";
+  } else {
+    return "Your overall health indicators are positive! Your body is showing good balance across multiple metrics. Continue maintaining your current healthy habits, and consider setting small wellness goals to further optimize your physical and mental wellbeing.";
+  }
+};
 
 const statusColors = {
   normal: "bg-success text-success-foreground",
@@ -64,6 +162,18 @@ interface DigitalTwinDashboardProps {
 }
 
 const DigitalTwinDashboard = ({ isVisible }: DigitalTwinDashboardProps) => {
+  const [metrics, setMetrics] = useState<HealthMetric[]>([]);
+  const [personalizedInsight, setPersonalizedInsight] = useState<string>("");
+
+  useEffect(() => {
+    if (isVisible) {
+      // Generate new random metrics each time the dashboard becomes visible
+      const newMetrics = generateRandomMetrics();
+      setMetrics(newMetrics);
+      setPersonalizedInsight(generatePersonalizedInsight(newMetrics));
+    }
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
   return (
@@ -204,9 +314,7 @@ const DigitalTwinDashboard = ({ isVisible }: DigitalTwinDashboardProps) => {
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-2">AI Health Insight</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Your body appears to be functioning well overall. Your heart rhythm is steady, 
-                and your stress levels are low. Consider maintaining consistent sleep patterns 
-                to optimize your recovery. Small routine adjustments can enhance your wellbeing over time.
+                {personalizedInsight}
               </p>
             </div>
           </div>

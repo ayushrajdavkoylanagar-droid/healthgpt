@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Heart, Linkedin } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -47,6 +47,51 @@ const Footer = () => {
             <p className="text-muted-foreground text-sm leading-relaxed">
               HealthGPT provides awareness insights only and does not replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider.
             </p>
+          </div>
+        </div>
+
+        {/* Co-founders Section */}
+        <div className="pt-8 border-t border-border">
+          <div className="text-center mb-6">
+            <h4 className="font-semibold text-foreground mb-2">Co-Founders</h4>
+            <p className="text-muted-foreground text-sm">Meet the minds behind HealthGPT</p>
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+            {/* Ayush Raj */}
+            <div className="flex flex-col items-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-3 group-hover:scale-105 transition-transform">
+                AR
+              </div>
+              <h5 className="font-semibold text-foreground mb-1">Ayush Raj</h5>
+              <p className="text-muted-foreground text-sm mb-2">Co-Founder & Developer</p>
+              <a
+                href="https://www.linkedin.com/in/ayush-raj-90aa00377?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors text-sm"
+              >
+                <Linkedin size={14} />
+                LinkedIn
+              </a>
+            </div>
+
+            {/* Sourav Kumar */}
+            <div className="flex flex-col items-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-3 group-hover:scale-105 transition-transform">
+                SK
+              </div>
+              <h5 className="font-semibold text-foreground mb-1">Sourav Kumar</h5>
+              <p className="text-muted-foreground text-sm mb-2">Co-Founder & Developer</p>
+              <a
+                href="https://www.linkedin.com/in/sourav-kumar-93423838a/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors text-sm"
+              >
+                <Linkedin size={14} />
+                LinkedIn
+              </a>
+            </div>
           </div>
         </div>
 

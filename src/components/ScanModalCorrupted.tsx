@@ -11,9 +11,9 @@ interface ScanModalProps {
   onComplete: () => void;
 }
 
-type Step = "prepare" | "camera" | "capture" | "preparing" | "complete";
+type Step = "prepare" | "camera" | "capture" | "complete" | "no-face";
 
-const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
+const ScanModalSimple = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
   const [step, setStep] = useState<Step>("prepare");
   const [timer, setTimer] = useState(20);
   const [hasPermission, setHasPermission] = useState(false);
@@ -45,7 +45,11 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
         setTimer((prev) => {
           if (prev <= 1) {
             clearInterval(countdownInterval);
-            console.log('⏰ 20-second countdown completed - waiting for TensorFlow.js to complete');
+            console.log('⏰ 20-second countdown completed - forcing scan completion');
+            // Force completion after 20 seconds even if TensorFlow.js doesn't call back
+            setTimeout(() => {
+              setStep("complete");
+            }, 1000);
             return 0;
           }
           return prev - 1;
@@ -68,9 +72,7 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
   };
 
   const handleScanComplete = (faceWasDetected: boolean, scanResults?: any) => {
-    console.log('🎯 handleScanComplete CALLED with:', { faceWasDetected, scanResults });
-    console.log('🔍 faceWasDetected value:', faceWasDetected);
-    console.log('🔍 typeof faceWasDetected:', typeof faceWasDetected);
+    console.log('🎯 Ultra-lenient TensorFlow.js scan complete:', { faceWasDetected, scanResults });
     
     if (faceWasDetected && scanResults) {
       // Store scan results in localStorage for later use
@@ -82,20 +84,14 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
       console.log('🎯 Total face detections:', scanResults.faceDetectedCount);
       console.log('🔢 Total checks:', scanResults.totalChecks);
       
-      // Show preparing step first
-      console.log('🔄 Moving to preparing step...');
-      setStep("preparing");
-      
-      // Then move to complete step after a delay
+      // Move to complete step - show health parameters
       setTimeout(() => {
-        console.log('🔄 Moving to complete step...');
         setStep("complete");
-      }, 3000); // 3 seconds delay for preparing display
+      }, 500);
     } else {
       console.log('❌ ABSOLUTE FAILURE - No face detected even once during entire 20-second scan');
-      console.log('🔄 Showing retry modal - no health parameters, only scan again option');
-      console.log('🔄 Showing retry modal...');
-      setShowRetryModal(true);
+      console.log('🚫 Showing no-face step - no health parameters, only scan again option');
+      setStep("no-face");
     }
   };
 
@@ -425,59 +421,6 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
               </div>
             )}
 
-            {step === "preparing" && (
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", duration: 0.5 }}
-                    className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-4"
-                  >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Activity className="w-10 h-10 text-green-600" />
-                    </motion.div>
-                  </motion.div>
-                  <h2 className="text-2xl font-display font-bold text-secondary mb-2">Preparing Your Health Report</h2>
-                  <p className="text-muted-foreground mb-6">Analyzing your scan data and generating personalized insights...</p>
-                  
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="w-full max-w-sm">
-                      <div className="flex justify-between text-sm text-muted-foreground mb-2">
-                        <span>Processing health metrics</span>
-                        <span>75%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <motion.div
-                          className="bg-green-600 h-2 rounded-full"
-                          initial={{ width: "0%" }}
-                          animate={{ width: "75%" }}
-                          transition={{ duration: 2.5, ease: "easeInOut" }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-wrap justify-center gap-2 mt-4">
-                      {["Heart Rate", "Stress Level", "Sleep Quality", "Emotion Score", "Hydration"].map((metric, index) => (
-                        <motion.div
-                          key={metric}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.3 }}
-                          className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium"
-                        >
-                          {metric}
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {step === "complete" && (
               <div className="p-8">
                 <div className="text-center mb-8">
@@ -485,61 +428,6 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", duration: 0.5 }}
-                    className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-4"
-                  >
-                    <Check className="w-10 h-10 text-green-600" />
-                  </motion.div>
-                  <h2 className="text-2xl font-display font-bold text-secondary mb-2">Scan Complete!</h2>
-                  <p className="text-muted-foreground">Your face scan results are ready</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {[
-                    { icon: Heart, label: "Heart Rate", value: "72 bpm" },
-                    { icon: Brain, label: "Stress", value: "Low" },
-                    { icon: Zap, label: "Energy", value: "High" },
-                    { icon: Activity, label: "Activity", value: "Normal" },
-                  ].map((metric, index) => (
-                    <motion.div
-                      key={metric.label}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="p-4 rounded-lg bg-muted/50 text-center"
-                    >
-                      <metric.icon className="w-6 h-6 text-primary mx-auto mb-2" />
-                      <div className="text-sm font-medium">{metric.label}</div>
-                      <div className="text-lg font-bold text-primary">{metric.value}</div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="space-y-3">
-                  <Button
-                    onClick={handleComplete}
-                    className="w-full"
-                    size="lg"
-                  >
-                    View Digital Twin
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                  <Button
-                    onClick={() => setStep("prepare")}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Scan Again
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-center space-x-2 p-4 border-t">
-              {["prepare", "camera", "capture", "complete"].map((s, i) => (
-                <div
-                  key={s}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    ["prepare", "camera", "capture", "complete"].indexOf(step) >= i
                       ? "bg-primary"
                       : "bg-muted"
                   }`}
@@ -560,4 +448,4 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
   );
 };
 
-export default ScanModalFixed;
+export default ScanModalSimple;

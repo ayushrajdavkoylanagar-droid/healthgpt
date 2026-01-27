@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   onScanClick: () => void;
@@ -9,6 +10,7 @@ interface HeaderProps {
 
 const Header = ({ onScanClick }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navItems = [
     { label: "About", href: "#about" },
@@ -46,9 +48,44 @@ const Header = ({ onScanClick }: HeaderProps) => {
               {item.label}
             </a>
           ))}
-          <Button onClick={onScanClick} size="lg" className="rounded-lg font-semibold">
-            Scan Yourself
-          </Button>
+          
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  {user?.name}
+                </span>
+              </div>
+              <Button onClick={onScanClick} size="lg" className="rounded-lg font-semibold">
+                Scan Yourself
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={logout}
+                className="rounded-lg"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => window.dispatchEvent(new CustomEvent('openRegistration'))}
+                className="rounded-lg font-semibold"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Register
+              </Button>
+              <Button onClick={onScanClick} size="lg" className="rounded-lg font-semibold">
+                Scan Yourself
+              </Button>
+            </div>
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -81,15 +118,60 @@ const Header = ({ onScanClick }: HeaderProps) => {
                   {item.label}
                 </a>
               ))}
-              <Button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onScanClick();
-                }}
-                className="w-full rounded-lg font-semibold"
-              >
-                Scan Yourself
-              </Button>
+              
+              {isAuthenticated ? (
+                <>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {user?.name}
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onScanClick();
+                    }}
+                    className="w-full rounded-lg font-semibold"
+                  >
+                    Scan Yourself
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                    className="w-full rounded-lg"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      window.dispatchEvent(new CustomEvent('openRegistration'));
+                    }}
+                    className="w-full rounded-lg font-semibold"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Register
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onScanClick();
+                    }}
+                    className="w-full rounded-lg font-semibold"
+                  >
+                    Scan Yourself
+                  </Button>
+                </>
+              )}
             </nav>
           </motion.div>
         )}
