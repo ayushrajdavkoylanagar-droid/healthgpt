@@ -80,78 +80,16 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
     setIsSubmitting(true);
 
     try {
-      // Prepare registration data with health scores
+      // Only store locally, no webhook call here
       const registrationData = {
-        // Registration details
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         age: formData.age.trim(),
         gender: formData.gender.trim(),
-        
-        // Health scores from scan (if available)
-        healthScores: healthScores || {
-          heartRate: '72 bpm',
-          stressLevel: 'Low',
-          sleepQuality: 'Good',
-          emotionScore: 'Positive',
-          hydrationLevel: 'Normal',
-          energyLevel: 'High',
-          activityLevel: 'Normal'
-        }
+        registrationDate: new Date().toISOString(),
+        source: 'HealthGPT Website'
       };
-
-      // Send data to Pabbly webhook
-      try {
-        // Force use of Vercel webhook URL
-        const webhookUrl = '/api/webhook';
-        
-        console.log('Attempting webhook from:', window.location.origin);
-        console.log('Webhook URL:', webhookUrl);
-        
-        // Add domain-specific headers for Vercel
-        const currentDomain = window.location.origin;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          'User-Agent': 'HealthGPT-Website/1.0',
-          'Origin': currentDomain,
-          'Referer': currentDomain
-        };
-        
-        // Use relative URL for Vercel deployment
-        const fullWebhookUrl = `${currentDomain}${webhookUrl}`;
-        
-        console.log('Full webhook URL:', fullWebhookUrl);
-        
-        // Add CORS mode for production
-        const fetchOptions: RequestInit = {
-          method: 'POST',
-          mode: 'cors' as RequestMode,
-          headers: headers,
-          body: JSON.stringify(registrationData)
-        };
-        
-        console.log('Fetch options:', fetchOptions);
-        
-        const webhookResponse = await fetch(fullWebhookUrl, fetchOptions);
-
-        console.log('Webhook response status:', webhookResponse.status);
-        console.log('Webhook response from:', currentDomain);
-        
-        if (!webhookResponse.ok) {
-          console.warn('Webhook failed, but continuing with local registration');
-          console.warn('Response text:', await webhookResponse.text());
-          console.warn('Response headers:', Object.fromEntries(webhookResponse.headers.entries()));
-        } else {
-          console.log('✅ Webhook sent successfully!');
-          console.log('Response data:', await webhookResponse.json());
-        }
-      } catch (webhookError) {
-        console.warn('Webhook error, but continuing with local registration:', webhookError);
-        console.warn('Current domain:', window.location.origin);
-        console.warn('Error details:', webhookError.message);
-        console.warn('Error stack:', webhookError.stack);
-      }
 
       // Simulate API call for local registration
       await new Promise(resolve => setTimeout(resolve, 1000));
