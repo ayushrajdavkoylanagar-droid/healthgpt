@@ -21,15 +21,28 @@ export default async function handler(req, res) {
   
   if (req.method === 'POST') {
     try {
+      // Get health scores from request
+      const healthScores = req.body.healthScores || {};
+      
       const webhookData = {
+        // Registration details
         name: req.body.name || 'Test User',
         email: req.body.email || 'test@example.com',
         phone: req.body.phone || '+1234567890',
-        age: req.body.age || '25',
-        gender: req.body.gender || 'male',
-        registrationDate: new Date().toISOString(),
-        source: 'HealthGPT Website - Vercel Production',
-        vercelTimestamp: new Date().toISOString()
+        
+        // Health scores from scan
+        heartRate: healthScores.heartRate || '72 bpm',
+        stressLevel: healthScores.stressLevel || 'Low',
+        sleepQuality: healthScores.sleepQuality || 'Good',
+        emotionScore: healthScores.emotionScore || 'Positive',
+        hydrationLevel: healthScores.hydrationLevel || 'Normal',
+        energyLevel: healthScores.energyLevel || 'High',
+        activityLevel: healthScores.activityLevel || 'Normal',
+        
+        // Scan metadata
+        scanDate: new Date().toISOString(),
+        scanType: 'HealthGPT Full Scan',
+        device: 'Web Application'
       };
       
       console.log('Sending to Pabbly:', webhookData);

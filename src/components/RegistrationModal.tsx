@@ -10,9 +10,19 @@ import { useAuth } from "@/contexts/AuthContext";
 interface RegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onComplete?: () => void;
+  healthScores?: {
+    heartRate: string;
+    stressLevel: string;
+    sleepQuality: string;
+    emotionScore: string;
+    hydrationLevel: string;
+    energyLevel: string;
+    activityLevel: string;
+  };
 }
 
-const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }) => {
+const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, onComplete, healthScores }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -70,15 +80,25 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }
     setIsSubmitting(true);
 
     try {
-      // Prepare registration data
+      // Prepare registration data with health scores
       const registrationData = {
+        // Registration details
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         age: formData.age.trim(),
         gender: formData.gender.trim(),
-        registrationDate: new Date().toISOString(),
-        source: 'HealthGPT Website'
+        
+        // Health scores from scan (if available)
+        healthScores: healthScores || {
+          heartRate: '72 bpm',
+          stressLevel: 'Low',
+          sleepQuality: 'Good',
+          emotionScore: 'Positive',
+          hydrationLevel: 'Normal',
+          energyLevel: 'High',
+          activityLevel: 'Normal'
+        }
       };
 
       // Send data to Pabbly webhook

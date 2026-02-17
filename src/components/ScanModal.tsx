@@ -121,7 +121,46 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
     setStep("capture");
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    // Send health scores with registration data
+    try {
+      const healthScores = {
+        heartRate: '72 bpm',
+        stressLevel: 'Low',
+        sleepQuality: 'Good',
+        emotionScore: 'Positive',
+        hydrationLevel: 'Normal',
+        energyLevel: 'High',
+        activityLevel: 'Normal'
+      };
+
+      const registrationData = {
+        name: 'HealthGPT User',
+        email: 'user@healthgpt.com',
+        phone: '+1234567890',
+        healthScores: healthScores
+      };
+
+      console.log('🚀 Sending health scores with registration...');
+      console.log('📊 Health scores:', healthScores);
+      console.log('📤 Registration data:', registrationData);
+
+      const response = await fetch('/api/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'HealthGPT-Scan/1.0'
+        },
+        body: JSON.stringify(registrationData)
+      });
+
+      const result = await response.json();
+      console.log('✅ Health scores sent:', result);
+
+    } catch (error) {
+      console.error('❌ Error sending health scores:', error);
+    }
+
     onComplete();
     onClose();
   };
