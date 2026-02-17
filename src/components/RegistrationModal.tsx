@@ -83,21 +83,48 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }
 
       // Send data to Pabbly webhook
       try {
-        const webhookResponse = await fetch('https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZkNTUzNzUxMzci_pc', {
+        const webhookUrl = import.meta.env.VITE_WEBHOOK_URL || 'https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZkNTUzNzUxMzci_pc';
+        
+        console.log('Attempting webhook from:', window.location.origin);
+        console.log('Webhook URL:', webhookUrl);
+        
+        // Add domain-specific headers for Vercel
+        const currentDomain = window.location.origin;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'User-Agent': 'HealthGPT-Website/1.0',
+          'Origin': currentDomain,
+          'Referer': currentDomain
+        };
+        
+        // Add CORS mode for production
+        const fetchOptions: RequestInit = {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          mode: 'cors' as RequestMode,
+          headers: headers,
           body: JSON.stringify(registrationData)
-        });
+        };
+        
+        console.log('Fetch options:', fetchOptions);
+        
+        const webhookResponse = await fetch(webhookUrl, fetchOptions);
 
         console.log('Webhook response status:', webhookResponse.status);
+        console.log('Webhook response from:', currentDomain);
         
         if (!webhookResponse.ok) {
           console.warn('Webhook failed, but continuing with local registration');
+          console.warn('Response text:', await webhookResponse.text());
+          console.warn('Response headers:', Object.fromEntries(webhookResponse.headers.entries()));
+        } else {
+          console.log('✅ Webhook sent successfully!');
+          console.log('Response data:', await webhookResponse.json());
         }
       } catch (webhookError) {
         console.warn('Webhook error, but continuing with local registration:', webhookError);
+        console.warn('Current domain:', window.location.origin);
+        console.warn('Error details:', webhookError.message);
+        console.warn('Error stack:', webhookError.stack);
       }
 
       // Simulate API call for local registration
