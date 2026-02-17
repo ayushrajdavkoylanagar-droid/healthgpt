@@ -34,12 +34,14 @@ export default async function handler(req, res) {
       
       console.log('Sending to Pabbly:', webhookData);
       
-      // Send to Pabbly
-      console.log(' About to call Pabbly webhook...');
-      console.log(' Pabbly URL:', 'https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZkNTUzNzUxMzci_pc');
-      console.log(' Data to send:', webhookData);
+      // Send to Pabbly - UPDATED WITH CORRECT WEBHOOK URL
+      const pabblyWebhookUrl = 'https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZjNTUzMzUxMzYi_pc'; // ✅ CORRECT URL
       
-      const response = await fetch('https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZkNTUzNzUxMzci_pc', {
+      console.log('🚀 About to call Pabbly webhook...');
+      console.log('📡 Pabbly URL:', pabblyWebhookUrl);
+      console.log('📤 Data to send:', webhookData);
+      
+      const response = await fetch(pabblyWebhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
