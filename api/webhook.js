@@ -21,31 +21,19 @@ export default async function handler(req, res) {
   
   if (req.method === 'POST') {
     try {
-      // Get health scores from request
-      const healthScores = req.body.healthScores || {};
-      
+      // Only accept the 6 fields requested by user
       const webhookData = {
-        // Registration details
-        name: req.body.name || 'Test User',
-        email: req.body.email || 'test@example.com',
-        phone: req.body.phone || '+1234567890',
-        
-        // Health scores from scan
-        heartRate: healthScores.heartRate || '72 bpm',
-        stressLevel: healthScores.stressLevel || 'Low',
-        sleepQuality: healthScores.sleepQuality || 'Good',
-        emotionScore: healthScores.emotionScore || 'Positive',
-        hydrationLevel: healthScores.hydrationLevel || 'Normal',
-        energyLevel: healthScores.energyLevel || 'High',
-        activityLevel: healthScores.activityLevel || 'Normal',
-        
-        // Scan metadata
-        scanDate: new Date().toISOString(),
-        scanType: 'HealthGPT Full Scan',
-        device: 'Web Application'
+        name: req.body.name || 'Unknown User',
+        email: req.body.email || 'unknown@example.com',
+        phone: req.body.phone || '+0000000000',
+        heartRate: req.body.heartRate || 'Unknown',
+        stressScore: req.body.stressScore || 'Unknown',
+        sleepScore: req.body.sleepScore || 'Unknown',
+        emotionScore: req.body.emotionScore || 'Unknown',
+        hydrationScore: req.body.hydrationScore || 'Unknown'
       };
       
-      console.log('Sending to Pabbly:', webhookData);
+      console.log('📤 Sending EXACT user data to Pabbly:', webhookData);
       
       // Send to Pabbly - UPDATED WITH CORRECT WEBHOOK URL
       const pabblyWebhookUrl = 'https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZjNTUzMzUxMzYi_pc'; // ✅ CORRECT URL

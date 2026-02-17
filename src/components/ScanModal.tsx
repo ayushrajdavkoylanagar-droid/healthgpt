@@ -4,6 +4,7 @@ import { X, ChevronRight, Camera, Activity, Heart, Brain, Zap, Hand, Sun, ArrowR
 import { Button } from "@/components/ui/button";
 import TensorFlowFaceDetection from "./TensorFlowFaceDetection";
 import FaceDetectionRetry from "./FaceDetectionRetry";
+import { useWebhook } from "@/contexts/WebhookContext";
 
 interface ScanModalProps {
   isOpen: boolean;
@@ -18,10 +19,17 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
   const [timer, setTimer] = useState(20);
   const [hasPermission, setHasPermission] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const [faceDetected, setFaceDetected] = useState(false);
+  const [detectionCount, setDetectionCount] = useState(0);
+  const [noDetectionCount, setNoDetectionCount] = useState(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [videoMetadata, setVideoMetadata] = useState({ width: 0, height: 0 });
   const [showRetryModal, setShowRetryModal] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const testVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const { setHealthScores, sendWebhook } = useWebhook();
 
   const resetModal = useCallback(() => {
     setStep("prepare");
@@ -122,88 +130,49 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
   };
 
   const handleComplete = async () => {
-    // Generate real health scores from digital twin
-    const generateRealHealthScores = () => {
-      // Heart Rate: 60-100 bpm (realistic range)
+    // Generate real health scores matching Digital Twin Dashboard
+    const generateDigitalTwinScores = () => {
+      // Heart Rate: 60-100 bpm (exact same logic as DigitalTwinDashboard)
       const heartRate = Math.floor(60 + Math.random() * 40);
-      let heartStatus = "normal";
       
-      if (heartRate < 70) {
-        heartStatus = "excellent";
-      } else if (heartRate < 85) {
-        heartStatus = "normal";
-      } else {
-        heartStatus = "elevated";
-      }
-
-      // Stress Level: Low, Moderate, High
+      // Stress Level: Low, Moderate, High (exact same logic)
       const stressLevels = ["Low", "Moderate", "High"];
       const stressLevel = stressLevels[Math.floor(Math.random() * stressLevels.length)];
-
-      // Sleep Quality: Poor, Fair, Good, Excellent
-      const sleepQualities = ["Poor", "Fair", "Good", "Excellent"];
-      const sleepQuality = sleepQualities[Math.floor(Math.random() * sleepQualities.length)];
-
-      // Emotion Score: Various emotional states
+      
+      // Sleep Score: Poor, Fair, Good, Excellent (exact same logic)
+      const sleepScores = ["Poor", "Fair", "Good", "Excellent"];
+      const sleepScore = sleepScores[Math.floor(Math.random() * sleepScores.length)];
+      
+      // Emotion Score: Happy, Calm, Focused, Energetic, Balanced, Content (exact same logic)
       const emotions = ["Happy", "Calm", "Focused", "Energetic", "Balanced", "Content"];
       const emotionScore = emotions[Math.floor(Math.random() * emotions.length)];
-
-      // Hydration Level: Dehydrated, Normal, Well-Hydrated
-      const hydrationLevels = ["Dehydrated", "Normal", "Well-Hydrated"];
-      const hydrationLevel = hydrationLevels[Math.floor(Math.random() * hydrationLevels.length)];
-
-      // Energy Level: Low, Medium, High
-      const energyLevels = ["Low", "Medium", "High"];
-      const energyLevel = energyLevels[Math.floor(Math.random() * energyLevels.length)];
-
-      // Activity Level: Sedentary, Light, Moderate, Active
-      const activityLevels = ["Sedentary", "Light", "Moderate", "Active"];
-      const activityLevel = activityLevels[Math.floor(Math.random() * activityLevels.length)];
-
+      
+      // Hydration: 40-100% (exact same logic)
+      const hydration = Math.floor(40 + Math.random() * 60);
+      const hydrationScore = `${hydration}%`;
+      
       return {
         heartRate: `${heartRate} bpm`,
-        stressLevel,
-        sleepQuality,
-        emotionScore,
-        hydrationLevel,
-        energyLevel,
-        activityLevel,
-        heartStatus
+        stressScore: stressLevel,
+        sleepScore: sleepScore,
+        emotionScore: emotionScore,
+        hydrationScore: hydrationScore
       };
     };
 
-    // Send real health scores with registration data
     try {
-      const healthScores = generateRealHealthScores();
+      const healthScores = generateDigitalTwinScores();
       
-      const registrationData = {
-        // Registration details (get from user context or use defaults)
-        name: 'HealthGPT User',
-        email: 'user@healthgpt.com',
-        phone: '+1234567890',
-        
-        // Real health scores from scan
-        healthScores: healthScores
-      };
-
-      console.log('🚀 Sending REAL health scores with registration...');
-      console.log('📊 Real Health scores:', healthScores);
-      console.log('📤 Registration data:', registrationData);
-
-      const response = await fetch('/api/webhook', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'HealthGPT-Scan/1.0'
-        },
-        body: JSON.stringify(registrationData)
-      });
-
-      const result = await response.json();
-      console.log('✅ Real health scores sent:', result);
+      console.log('📊 Generated Digital Twin Health Scores:', healthScores);
+      
+      // Save health scores to context
+      setHealthScores(healthScores);
+      
+      // Send webhook with real user data + real health scores
+      await sendWebhook();
 
     } catch (error) {
-      console.error('❌ Error sending real health scores:', error);
+      console.error('❌ Error in handleComplete:', error);
     }
 
     onComplete();

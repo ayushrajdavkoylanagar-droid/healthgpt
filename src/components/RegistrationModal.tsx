@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { X, User, Mail, Phone, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWebhook } from "@/contexts/WebhookContext";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ interface RegistrationModalProps {
   };
 }
 
-const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, onComplete, healthScores }) => {
+const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, onComplete }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,6 +35,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { register } = useAuth();
+  const { setUserData } = useWebhook();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -80,7 +82,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
     setIsSubmitting(true);
 
     try {
-      // Only store locally, no webhook call here
+      // Only store locally and save user data for webhook
       const registrationData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
@@ -90,6 +92,19 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
         registrationDate: new Date().toISOString(),
         source: 'HealthGPT Website'
       };
+
+      // Save user data to webhook context
+      setUserData({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim()
+      });
+
+      console.log('💾 User data saved for webhook:', {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim()
+      });
 
       // Simulate API call for local registration
       await new Promise(resolve => setTimeout(resolve, 1000));
