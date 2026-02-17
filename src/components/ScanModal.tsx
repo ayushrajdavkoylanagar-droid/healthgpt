@@ -166,10 +166,14 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
       console.log('📊 Generated Digital Twin Health Scores:', healthScores);
       
       // Save health scores to context
+      console.log('💾 Attempting to save health scores to context...');
       setHealthScores(healthScores);
+      console.log('✅ Health scores saved to context:', healthScores);
       
       // Send webhook with real user data + real health scores
+      console.log('🚀 Calling sendWebhook function...');
       await sendWebhook();
+      console.log('✅ sendWebhook completed');
 
     } catch (error) {
       console.error('❌ Error in handleComplete:', error);

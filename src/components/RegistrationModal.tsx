@@ -94,17 +94,17 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
       };
 
       // Save user data to webhook context
-      setUserData({
+      console.log('💾 Attempting to save user data to context...');
+      const userDataToSave = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim()
-      });
-
-      console.log('💾 User data saved for webhook:', {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim()
-      });
+      };
+      
+      setUserData(userDataToSave);
+      
+      console.log('✅ User data saved to webhook context:', userDataToSave);
+      console.log('🔍 setUserData function called');
 
       // Simulate API call for local registration
       await new Promise(resolve => setTimeout(resolve, 1000));

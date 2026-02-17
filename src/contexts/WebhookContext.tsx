@@ -41,8 +41,14 @@ export const WebhookProvider: React.FC<WebhookProviderProps> = ({ children }) =>
   const [healthScores, setHealthScores] = useState<HealthScores | null>(null);
 
   const sendWebhook = async () => {
+    console.log('🔍 sendWebhook called');
+    console.log('🔍 userData:', userData);
+    console.log('🔍 healthScores:', healthScores);
+    
     if (!userData || !healthScores) {
-      console.error('Missing user data or health scores for webhook');
+      console.error('❌ Missing user data or health scores for webhook');
+      console.error('❌ userData exists:', !!userData);
+      console.error('❌ healthScores exists:', !!healthScores);
       return;
     }
 

@@ -21,16 +21,31 @@ export default async function handler(req, res) {
   
   if (req.method === 'POST') {
     try {
-      // Only accept the 6 fields requested by user
+      console.log('🔍 Webhook request body:', req.body);
+      
+      // Validate required fields - NO FALLBACKS
+      const requiredFields = ['name', 'email', 'phone', 'heartRate', 'stressScore', 'sleepScore', 'emotionScore', 'hydrationScore'];
+      const missingFields = requiredFields.filter(field => !req.body[field]);
+      
+      if (missingFields.length > 0) {
+        console.error('❌ Missing required fields:', missingFields);
+        return res.status(400).json({
+          error: 'Missing required fields',
+          missingFields: missingFields,
+          receivedBody: req.body
+        });
+      }
+      
+      // Only accept the 6 fields requested by user - NO FALLBACKS
       const webhookData = {
-        name: req.body.name || 'Unknown User',
-        email: req.body.email || 'unknown@example.com',
-        phone: req.body.phone || '+0000000000',
-        heartRate: req.body.heartRate || 'Unknown',
-        stressScore: req.body.stressScore || 'Unknown',
-        sleepScore: req.body.sleepScore || 'Unknown',
-        emotionScore: req.body.emotionScore || 'Unknown',
-        hydrationScore: req.body.hydrationScore || 'Unknown'
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        heartRate: req.body.heartRate,
+        stressScore: req.body.stressScore,
+        sleepScore: req.body.sleepScore,
+        emotionScore: req.body.emotionScore,
+        hydrationScore: req.body.hydrationScore
       };
       
       console.log('📤 Sending EXACT user data to Pabbly:', webhookData);
