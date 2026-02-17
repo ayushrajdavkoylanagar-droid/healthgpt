@@ -35,6 +35,10 @@ export default async function handler(req, res) {
       console.log('Sending to Pabbly:', webhookData);
       
       // Send to Pabbly
+      console.log(' About to call Pabbly webhook...');
+      console.log(' Pabbly URL:', 'https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZkNTUzNzUxMzci_pc');
+      console.log(' Data to send:', webhookData);
+      
       const response = await fetch('https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZkNTUzNzUxMzci_pc', {
         method: 'POST',
         headers: {
@@ -44,12 +48,12 @@ export default async function handler(req, res) {
         body: JSON.stringify(webhookData)
       });
       
+      console.log(' Pabbly response status:', response.status);
+      console.log(' Pabbly response headers:', Object.fromEntries(response.headers.entries()));
+      
       const responseData = await response.text();
-      console.log('Pabbly response:', {
-        status: response.status,
-        statusText: response.statusText,
-        data: responseData
-      });
+      console.log(' Pabbly response data:', responseData);
+      console.log(' Pabbly response type:', typeof responseData);
       
       res.status(200).json({
         success: true,
