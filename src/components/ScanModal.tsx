@@ -165,15 +165,51 @@ const ScanModalFixed = ({ isOpen, onClose, onComplete }: ScanModalProps) => {
       
       console.log('📊 Generated Digital Twin Health Scores:', healthScores);
       
+      // Get user data directly from localStorage (bypass context issues)
+      const userDataStr = localStorage.getItem('webhookUserData');
+      const userData = userDataStr ? JSON.parse(userDataStr) : null;
+      
+      console.log('🔍 Retrieved user data from localStorage:', userData);
+      
+      if (!userData) {
+        console.error('❌ No user data found in localStorage!');
+        alert('Please register first before completing scan!');
+        return;
+      }
+      
       // Save health scores to context
       console.log('💾 Attempting to save health scores to context...');
       setHealthScores(healthScores);
       console.log('✅ Health scores saved to context:', healthScores);
       
-      // Send webhook with real user data + real health scores
-      console.log('🚀 Calling sendWebhook function...');
-      await sendWebhook();
-      console.log('✅ sendWebhook completed');
+      // Direct webhook call (bypass context issues)
+      const webhookData = {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        heartRate: healthScores.heartRate,
+        stressScore: healthScores.stressScore,
+        sleepScore: healthScores.sleepScore,
+        emotionScore: healthScores.emotionScore,
+        hydrationScore: healthScores.hydrationScore
+      };
+
+      console.log('🚀 Sending DIRECT webhook with REAL data:');
+      console.log('👤 User:', userData);
+      console.log('📊 Health:', healthScores);
+      console.log('📤 Full payload:', webhookData);
+
+      const response = await fetch('/api/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'HealthGPT-Direct/1.0'
+        },
+        body: JSON.stringify(webhookData)
+      });
+
+      const result = await response.json();
+      console.log('✅ DIRECT webhook sent successfully:', result);
 
     } catch (error) {
       console.error('❌ Error in handleComplete:', error);

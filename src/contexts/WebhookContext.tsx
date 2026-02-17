@@ -37,36 +37,55 @@ interface WebhookProviderProps {
 }
 
 export const WebhookProvider: React.FC<WebhookProviderProps> = ({ children }) => {
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [healthScores, setHealthScores] = useState<HealthScores | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(() => {
+    // Load from localStorage on mount
+    const saved = localStorage.getItem('webhookUserData');
+    return saved ? JSON.parse(saved) : null;
+  });
+  
+  const [healthScores, setHealthScores] = useState<HealthScores | null>(() => {
+    // Load from localStorage on mount
+    const saved = localStorage.getItem('webhookHealthScores');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const sendWebhook = async () => {
     console.log('🔍 sendWebhook called');
     console.log('🔍 userData:', userData);
     console.log('🔍 healthScores:', healthScores);
     
-    if (!userData || !healthScores) {
+    // Try to get from localStorage as backup
+    const localStorageUserData = localStorage.getItem('webhookUserData');
+    const localStorageHealthScores = localStorage.getItem('webhookHealthScores');
+    
+    const finalUserData = userData || (localStorageUserData ? JSON.parse(localStorageUserData) : null);
+    const finalHealthScores = healthScores || (localStorageHealthScores ? JSON.parse(localStorageHealthScores) : null);
+    
+    console.log('🔍 finalUserData:', finalUserData);
+    console.log('🔍 finalHealthScores:', finalHealthScores);
+    
+    if (!finalUserData || !finalHealthScores) {
       console.error('❌ Missing user data or health scores for webhook');
-      console.error('❌ userData exists:', !!userData);
-      console.error('❌ healthScores exists:', !!healthScores);
+      console.error('❌ userData exists:', !!finalUserData);
+      console.error('❌ healthScores exists:', !!finalHealthScores);
       return;
     }
 
     try {
       const webhookData = {
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        heartRate: healthScores.heartRate,
-        stressScore: healthScores.stressScore,
-        sleepScore: healthScores.sleepScore,
-        emotionScore: healthScores.emotionScore,
-        hydrationScore: healthScores.hydrationScore
+        name: finalUserData.name,
+        email: finalUserData.email,
+        phone: finalUserData.phone,
+        heartRate: finalHealthScores.heartRate,
+        stressScore: finalHealthScores.stressScore,
+        sleepScore: finalHealthScores.sleepScore,
+        emotionScore: finalHealthScores.emotionScore,
+        hydrationScore: finalHealthScores.hydrationScore
       };
 
       console.log('🚀 Sending webhook with REAL data:');
-      console.log('👤 User:', userData);
-      console.log('📊 Health:', healthScores);
+      console.log('👤 User:', finalUserData);
+      console.log('📊 Health:', finalHealthScores);
       console.log('📤 Full payload:', webhookData);
 
       const response = await fetch('/api/webhook', {
@@ -86,12 +105,26 @@ export const WebhookProvider: React.FC<WebhookProviderProps> = ({ children }) =>
     }
   };
 
+  // Enhanced setUserData that also saves to localStorage
+  const enhancedSetUserData = (data: UserData) => {
+    console.log('💾 Saving user data to context and localStorage:', data);
+    setUserData(data);
+    localStorage.setItem('webhookUserData', JSON.stringify(data));
+  };
+
+  // Enhanced setHealthScores that also saves to localStorage
+  const enhancedSetHealthScores = (scores: HealthScores) => {
+    console.log('💾 Saving health scores to context and localStorage:', scores);
+    setHealthScores(scores);
+    localStorage.setItem('webhookHealthScores', JSON.stringify(scores));
+  };
+
   return (
     <WebhookContext.Provider value={{
       userData,
       healthScores,
-      setUserData,
-      setHealthScores,
+      setUserData: enhancedSetUserData,
+      setHealthScores: enhancedSetHealthScores,
       sendWebhook
     }}>
       {children}
