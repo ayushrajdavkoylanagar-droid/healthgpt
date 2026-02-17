@@ -83,7 +83,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }
 
       // Send data to Pabbly webhook
       try {
-        const webhookUrl = import.meta.env.VITE_WEBHOOK_URL || 'https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjcwNTZjMDYzNTA0MzM1MjZkNTUzNzUxMzci_pc';
+        const webhookUrl = import.meta.env.VITE_WEBHOOK_URL || '/api/webhook';
         
         console.log('Attempting webhook from:', window.location.origin);
         console.log('Webhook URL:', webhookUrl);
@@ -97,6 +97,13 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }
           'Referer': currentDomain
         };
         
+        // Use relative URL for Vercel deployment
+        const fullWebhookUrl = webhookUrl.startsWith('http') 
+          ? webhookUrl 
+          : `${currentDomain}${webhookUrl}`;
+        
+        console.log('Full webhook URL:', fullWebhookUrl);
+        
         // Add CORS mode for production
         const fetchOptions: RequestInit = {
           method: 'POST',
@@ -107,7 +114,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }
         
         console.log('Fetch options:', fetchOptions);
         
-        const webhookResponse = await fetch(webhookUrl, fetchOptions);
+        const webhookResponse = await fetch(fullWebhookUrl, fetchOptions);
 
         console.log('Webhook response status:', webhookResponse.status);
         console.log('Webhook response from:', currentDomain);
