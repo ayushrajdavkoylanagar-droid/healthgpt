@@ -83,7 +83,8 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }
 
       // Send data to Pabbly webhook
       try {
-        const webhookUrl = import.meta.env.VITE_WEBHOOK_URL || '/api/webhook';
+        // Force use of Vercel webhook URL
+        const webhookUrl = '/api/webhook';
         
         console.log('Attempting webhook from:', window.location.origin);
         console.log('Webhook URL:', webhookUrl);
@@ -98,9 +99,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }
         };
         
         // Use relative URL for Vercel deployment
-        const fullWebhookUrl = webhookUrl.startsWith('http') 
-          ? webhookUrl 
-          : `${currentDomain}${webhookUrl}`;
+        const fullWebhookUrl = `${currentDomain}${webhookUrl}`;
         
         console.log('Full webhook URL:', fullWebhookUrl);
         
